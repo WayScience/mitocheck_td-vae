@@ -2,9 +2,7 @@ __author__ = "Keenan Manpearl"
 __date__ = "2023/03/01"
 
 """
-
-reads in an avi video file and returns an arrayy
-
+Reads in an avi video file and returns an array
 """
 
 import cv2

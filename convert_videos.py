@@ -2,8 +2,7 @@ __author__ = "Keenan Manpearl"
 __date__ = "2023/03/01"
 
 """
-converts movies into a pickle file for input to td-vae model 
-
+Converts movies into a pickle file for input to td-vae model 
 """
 import cv2
 import numpy as np

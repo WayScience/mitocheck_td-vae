@@ -1,7 +1,10 @@
-__author__ = "Xinqiang Ding <xqding@umich.edu>"
-__date__ = "2018/12/17 16:45:38"
+__author__ = "Keenan Manpearl"
+__date__ = "2023/03/01"
 
-import cv2
+"""
+Training a td-vae model on mitocheck movies
+"""
+
 import numpy as np
 import torch
 import torch.nn as nn

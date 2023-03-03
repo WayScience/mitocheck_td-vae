@@ -2,7 +2,7 @@ __author__ = "Keenan Manpearl"
 __date__ = "2023/03/01"
 
 """
-create a mitocheck dataset for input into pytorch model
+Create a mitocheck dataset for input into pytorch model
 """
 import cv2
 import numpy as np
