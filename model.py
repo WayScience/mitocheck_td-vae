@@ -347,7 +347,7 @@ class TD_VAE(nn.Module):
             This is a standard reconstruction term. We pass input data x through an encoder (belief network) to
             a lower dimensional compressed z. We then decode this z through a decoder to obtain the same input
             dimensions as X. We minimize the difference between this decoded X and the ground truth X. Importantly,
-            with this decoder we can now fully simulate new data in the original dimension. 
+            with this decoder we can now fully simulate new data in the original dimension.
 
                 This term fully enables data generation (original dimension).
         """
@@ -376,7 +376,6 @@ class TD_VAE(nn.Module):
             torch.cat((self.b[:, t2, :], z_time2_layer2), dim=-1)
         )
 
- 
         z_time2_layer1_epsilon = torch.randn_like(z_time2_layer1_mu)
 
         z_time2_layer1 = (
@@ -511,7 +510,7 @@ class TD_VAE(nn.Module):
         # 3) KL divergence between belief distribution at time 2 and transition distribution at time 2
         # This is line 14 of Appendix D representing loss_time2_layer2 (log(P_B(z_time2)) - log(P_T(z_time2)))
         loss_kl_belief_transition_z_time2_layer2 = torch.sum(
-            -0.5 * z_time2_layer2_epsilon**2
+            -0.5 * z_time2_layer2_epsilon ** 2
             - 0.5
             * z_time2_layer2_epsilon.new_tensor(
                 2 * np.pi
@@ -536,7 +535,7 @@ class TD_VAE(nn.Module):
         # 4) KL divergence between belief distribution at time 2 and transition distribution at time 2
         # This is line 15 of Appendix D representing loss_time2_layer1 (log(P_B(z_time2)) - log(P_T(z_time2)))
         loss_kl_belief_transition_z_time2_layer1 = torch.sum(
-            -0.5 * z_time2_layer1_epsilon**2
+            -0.5 * z_time2_layer1_epsilon ** 2
             - 0.5 * z_time2_layer1_epsilon.new_tensor(2 * np.pi)
             - z_time2_layer1_logsigma,
             dim=-1,
@@ -621,7 +620,6 @@ class TD_VAE(nn.Module):
             # Decode sampled state z_t1 to predict x
             predict_x = self.decoder_z_to_x(predict_z)
             rollout_x.append(predict_x)
-
 
             z = predict_z
 

@@ -21,7 +21,7 @@ class Mitocheck_Dataset(Dataset):
     def __getitem__(self, idx):
         image_seq = np.copy(self.image[idx, :, :])
         image_seq = image_seq.reshape(-1, image_seq.shape[0])
-        image_seq = np.transpose(image_seq, (1,0))
+        image_seq = np.transpose(image_seq, (1, 0))
         image_list = []
         if self.binary:
             # ## binarize images
@@ -30,12 +30,11 @@ class Mitocheck_Dataset(Dataset):
             # the within-class variance, defined as a weighted sum of
             # variances of the two classes (background and foreground)
             for idx in range(9):
-                image = image_seq[idx,:]
+                image = image_seq[idx, :]
                 nbins = 0.01
                 all_colors = image
                 total_weight = len(all_colors)
                 least_variance = -1
-                
 
                 # create an array of all possible threshold values which we want to loop through
                 color_thresholds = np.arange(

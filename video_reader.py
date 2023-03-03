@@ -10,6 +10,7 @@ reads in an avi video file and returns an arrayy
 import cv2
 import numpy as np
 
+
 def read_video(video_path, n_frames=10):
     cap = cv2.VideoCapture(video_path)
     all = []

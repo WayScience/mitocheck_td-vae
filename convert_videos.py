@@ -25,7 +25,7 @@ for plate_dir in movie_dir.iterdir():
             # dim 2 = height
             # dim 3 = width
             # dim 4 = channels, we do not need this
-            vid = vid[:,:,:,0]
+            vid = vid[:, :, :, 0]
             mitocheck.append(vid)
 mitocheck_arr = np.array(mitocheck)
 

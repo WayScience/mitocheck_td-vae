@@ -36,7 +36,7 @@ data_loader = DataLoader(data, batch_size=batch_size, shuffle=True)
 input_size = 3300
 processed_x_size = 3300
 belief_state_size = 50
-state_size = 8 
+state_size = 8
 d_block_hidden_size = 50
 decoder_hidden_size = 200
 
@@ -45,8 +45,8 @@ tdvae = TD_VAE(
     processed_x_size=processed_x_size,
     b_size=belief_state_size,
     z_size=state_size,
-    d_block_hidden_size = d_block_hidden_size,
-    decoder_hidden_size = decoder_hidden_size
+    d_block_hidden_size=d_block_hidden_size,
+    decoder_hidden_size=decoder_hidden_size,
 )
 
 
