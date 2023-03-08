@@ -305,6 +305,8 @@ class TD_VAE(nn.Module):
 
         # Aggregate the belief b - the model only uses b in subsequent steps
         self.b, (self.h_n, self.c_n) = self.lstm(self.processed_x)
+        
+        return(self.b)
 
     def calculate_loss(self, t1, t2):
         """
@@ -571,7 +573,7 @@ class TD_VAE(nn.Module):
         )
         loss = torch.mean(loss)
 
-        return loss
+        return loss, z_time1_smoothing, z_time2
 
     def rollout(self, images, t1, t2):
         # Preprocess images and pass through LSTM
@@ -605,7 +607,7 @@ class TD_VAE(nn.Module):
                 + torch.exp(predict_z_layer2_logsigma) * predict_z_layer2_epsilon
             )
 
-            predict_z_layer1_mu, predict_z_layer1_logsigma = self.l1_transition_z(
+            predict_z_layer1_mu, predict_z_layer1_logsigma = self.transition_z_layer1(
                 torch.cat((z, predict_z_layer2), dim=-1)
             )
             predict_z_layer1_epsilon = torch.randn_like(predict_z_layer1_mu)
@@ -622,4 +624,5 @@ class TD_VAE(nn.Module):
 
             z = predict_z
 
+        rollout_x = torch.stack(rollout_x, dim = 1)
         return rollout_x

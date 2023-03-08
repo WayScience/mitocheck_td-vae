@@ -11,14 +11,14 @@ import pickle
 from video_reader import read_video
 
 movie_dir = pathlib.Path("/home/keenanmanpearl/Desktop/mitocheck_movies/movies")
-save_path = pathlib.Path("mitocheck.pkl")
+save_path = pathlib.Path("mitocheck_compression5_2movies.pkl")
 n_frames = 10
 
 mitocheck = []
 for plate_dir in movie_dir.iterdir():
     for well_dir in plate_dir.iterdir():
         # processed videos end in .avi
-        for movie_path in well_dir.glob("*.avi"):
+        for movie_path in well_dir.glob("*compression5.avi"):
             vid = read_video(str(movie_path))
             # dim 1 = frame
             # dim 2 = height

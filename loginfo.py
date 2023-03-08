@@ -1,6 +1,10 @@
 __author__ = "Keenan Manpearl"
 __date__ = "2023/03/01"
 
+"""
+graph model loss
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 

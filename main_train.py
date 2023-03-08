@@ -14,35 +14,37 @@ import pathlib
 from torch.utils.data import DataLoader, Dataset
 from prep_data import Mitocheck_Dataset
 from model import TD_VAE, DBlock, PreProcess, Decoder
-import matplotlib.pyplot as plt
+import os
 
 
-log_file = pathlib.Path("loginfo.txt")
-data_file = pathlib.Path("mitocheck_4_plates.pkl")
+log_file = pathlib.Path("loginfo_compression10.txt")
+data_file = pathlib.Path("mitocheck_compression10_2movies.pkl")
 
 with open(data_file, "rb") as file_handle:
     mitocheck = pickle.load(file_handle)
 data = Mitocheck_Dataset(mitocheck)
+print(mitocheck.shape)
 
 # Set constants
 time_constant_max = 6  # There are 9 frames total
 time_jump_options = [1, 2, 3]  # Jump up to 3 frames away
 
 # Set hyperparameters
-batch_size = 20
+# all hyperparameters taken from original paper
+batch_size = 2
 num_epoch = 1000
-learning_rate = 0.0005
-
-data_loader = DataLoader(data, batch_size=batch_size, shuffle=True)
-
-# Build a TD-VAE model
-input_size = 3300
-processed_x_size = 3300
+learning_rate = 0.00005
+input_size = 102 * 134
+processed_x_size = 102 * 134
 belief_state_size = 50
 state_size = 8
 d_block_hidden_size = 50
 decoder_hidden_size = 200
 
+data_loader = DataLoader(data, batch_size=batch_size, shuffle=True)
+
+# Build a TD-VAE model
+print('making td-vae')
 tdvae = TD_VAE(
     x_size=input_size,
     processed_x_size=processed_x_size,
@@ -55,44 +57,37 @@ tdvae = TD_VAE(
 
 tdvae = tdvae.cuda()
 
-# Train model
+print('making optimizer')
 optimizer = optim.Adam(tdvae.parameters(), lr=learning_rate)
 
+print('training model')
 with open(log_file, "w") as log_file_handle:
     for epoch in range(num_epoch):
         for idx, images in enumerate(data_loader):
             images = images.cuda()
-
             # Make a forward step of preprocessing and LSTM
-            tdvae.forward(images)
-
+            b = tdvae.forward(images)
             # Randomly sample a time step and jumpy step
             t_1 = np.random.choice(time_constant_max)
             t_2 = t_1 + np.random.choice(time_jump_options)
-
             # Calculate loss function based on two time points
-            loss = tdvae.calculate_loss(t_1, t_2)
-
+            loss, t1_z, t2_z = tdvae.calculate_loss(t_1, t_2)
             # must clear out stored gradient
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
             print(
-                "epoch: {:>4d}, idx: {:>4d}, loss: {:.2f}".format(
-                    epoch, idx, loss.item()
-                ),
+                f"epoch: {epoch}, idx: {idx}, loss: {loss.item()}",
                 file=log_file_handle,
                 flush=True,
             )
 
-            print(
-                "epoch: {:>4d}, idx: {:>4d}, loss: {:.2f}".format(
-                    epoch, idx, loss.item()
-                )
-            )
 
-        if (epoch + 1) % 10 == 0:
+            print(f"epoch: {epoch}, idx: {idx}, loss: {loss.item()}")
+
+
+        if (epoch + 1) % 50 == 0:
             torch.save(
                 {
                     "epoch": epoch,
@@ -100,5 +95,8 @@ with open(log_file, "w") as log_file_handle:
                     "optimizer_state_dict": optimizer.state_dict(),
                     "loss": loss,
                 },
-                f"output/model_epoch_{epoch}.pt",
+                f"output/compression10_epoch_{epoch}.pt",
             )
+
+
+
