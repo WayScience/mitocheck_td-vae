@@ -15,3 +15,7 @@ All hyperparameters except `input_size` and `processed_x_size` can be adjusted a
 Additionally `time_constant_max` and `time_jump_options` should be changed if a different number of frames was specified during preprocessing.
 Training the model will generate two outputs. 
 The loss for each iteration is saved in `loginfo.txt` and the model is saved every 10 epochs to the `output` folder. 
+
+## Using the model 
+
+Afer training the model, `rollout.py` can be used to evaluate the model and create a jumpy rollout of a future time point. 

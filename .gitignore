@@ -1,6 +1,5 @@
 *pycache*
 output/*
-loginfo.txt*
-loginfo_*
+*.txt
 *.pkl
 nohup.out

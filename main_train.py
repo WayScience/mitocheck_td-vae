@@ -23,7 +23,6 @@ data_file = pathlib.Path("mitocheck_compression10_2movies.pkl")
 with open(data_file, "rb") as file_handle:
     mitocheck = pickle.load(file_handle)
 data = Mitocheck_Dataset(mitocheck)
-print(mitocheck.shape)
 
 # Set constants
 time_constant_max = 6  # There are 9 frames total
@@ -32,7 +31,7 @@ time_jump_options = [1, 2, 3]  # Jump up to 3 frames away
 # Set hyperparameters
 # all hyperparameters taken from original paper
 batch_size = 2
-num_epoch = 1000
+num_epoch = 50
 learning_rate = 0.00005
 input_size = 102 * 134
 processed_x_size = 102 * 134
@@ -44,7 +43,7 @@ decoder_hidden_size = 200
 data_loader = DataLoader(data, batch_size=batch_size, shuffle=True)
 
 # Build a TD-VAE model
-print('making td-vae')
+print("making td-vae")
 tdvae = TD_VAE(
     x_size=input_size,
     processed_x_size=processed_x_size,
@@ -57,21 +56,21 @@ tdvae = TD_VAE(
 
 tdvae = tdvae.cuda()
 
-print('making optimizer')
+print("making optimizer")
 optimizer = optim.Adam(tdvae.parameters(), lr=learning_rate)
 
-print('training model')
+print("training model")
 with open(log_file, "w") as log_file_handle:
     for epoch in range(num_epoch):
         for idx, images in enumerate(data_loader):
             images = images.cuda()
             # Make a forward step of preprocessing and LSTM
-            b = tdvae.forward(images)
+            tdvae.forward(images)
             # Randomly sample a time step and jumpy step
             t_1 = np.random.choice(time_constant_max)
             t_2 = t_1 + np.random.choice(time_jump_options)
             # Calculate loss function based on two time points
-            loss, t1_z, t2_z = tdvae.calculate_loss(t_1, t_2)
+            loss = tdvae.calculate_loss(t_1, t_2)
             # must clear out stored gradient
             optimizer.zero_grad()
             loss.backward()
@@ -83,9 +82,7 @@ with open(log_file, "w") as log_file_handle:
                 flush=True,
             )
 
-
             print(f"epoch: {epoch}, idx: {idx}, loss: {loss.item()}")
-
 
         if (epoch + 1) % 50 == 0:
             torch.save(
@@ -97,6 +94,3 @@ with open(log_file, "w") as log_file_handle:
                 },
                 f"output/compression10_epoch_{epoch}.pt",
             )
-
-
-

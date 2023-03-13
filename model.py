@@ -305,8 +305,6 @@ class TD_VAE(nn.Module):
 
         # Aggregate the belief b - the model only uses b in subsequent steps
         self.b, (self.h_n, self.c_n) = self.lstm(self.processed_x)
-        
-        return(self.b)
 
     def calculate_loss(self, t1, t2):
         """
@@ -373,7 +371,10 @@ class TD_VAE(nn.Module):
         )
 
         # Sample z at time 2 from the belief state at time 2 (layer 1)
-        (z_time2_layer1_mu, z_time2_layer1_logsigma,) = self.encoder_b_to_z_layer1(
+        (
+            z_time2_layer1_mu,
+            z_time2_layer1_logsigma,
+        ) = self.encoder_b_to_z_layer1(
             torch.cat((self.b[:, t2, :], z_time2_layer2), dim=-1)
         )
 
@@ -511,7 +512,7 @@ class TD_VAE(nn.Module):
         # 3) KL divergence between belief distribution at time 2 and transition distribution at time 2
         # This is line 14 of Appendix D representing loss_time2_layer2 (log(P_B(z_time2)) - log(P_T(z_time2)))
         loss_kl_belief_transition_z_time2_layer2 = torch.sum(
-            -0.5 * z_time2_layer2_epsilon ** 2
+            -0.5 * z_time2_layer2_epsilon**2
             - 0.5
             * z_time2_layer2_epsilon.new_tensor(
                 2 * np.pi
@@ -536,7 +537,7 @@ class TD_VAE(nn.Module):
         # 4) KL divergence between belief distribution at time 2 and transition distribution at time 2
         # This is line 15 of Appendix D representing loss_time2_layer1 (log(P_B(z_time2)) - log(P_T(z_time2)))
         loss_kl_belief_transition_z_time2_layer1 = torch.sum(
-            -0.5 * z_time2_layer1_epsilon ** 2
+            -0.5 * z_time2_layer1_epsilon**2
             - 0.5 * z_time2_layer1_epsilon.new_tensor(2 * np.pi)
             - z_time2_layer1_logsigma,
             dim=-1,
@@ -573,7 +574,7 @@ class TD_VAE(nn.Module):
         )
         loss = torch.mean(loss)
 
-        return loss, z_time1_smoothing, z_time2
+        return loss
 
     def rollout(self, images, t1, t2):
         # Preprocess images and pass through LSTM
@@ -624,5 +625,26 @@ class TD_VAE(nn.Module):
 
             z = predict_z
 
-        rollout_x = torch.stack(rollout_x, dim = 1)
+        rollout_x = torch.stack(rollout_x, dim=1)
         return rollout_x
+
+    def extract_latent_space(self, images, time):
+        z_values = []
+        # Preprocess images and pass through LSTM
+        self.forward(images)
+        for t in range(time):
+            # At time t1-1, we encode a state z based on belief at time t1-1
+            z_layer2_mu, z_layer2_logsigma = self.encoder_b_to_z_layer2(self.b[:, t, :])
+            z_layer2_epsilon = torch.randn_like(z_layer2_mu)
+            z_layer2 = z_layer2_mu + torch.exp(z_layer2_logsigma) * z_layer2_epsilon
+
+            z_layer1_mu, z_layer1_logsigma = self.encoder_b_to_z_layer1(
+                torch.cat((self.b[:, t, :], z_layer2), dim=-1)
+            )
+            z_layer1_epsilon = torch.randn_like(z_layer1_mu)
+            z_layer1 = z_layer1_mu + torch.exp(z_layer1_logsigma) * z_layer1_epsilon
+
+            z = torch.cat((z_layer1, z_layer2), dim=-1)
+            z_values.append(z.cpu().detach().numpy())
+
+        return z_values
